@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"github.com/jeffchao/gomkafka/gomkafka"
 	"log"
-  "time"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 )
 
 func run() {
-  go handleSignals()
-  work()
+	go handleSignals()
+	work()
 }
 
 func work() {
@@ -27,7 +27,7 @@ func work() {
 		}
 
 		fmt.Println(rsyslog)
-    time.Sleep(1 * time.Millisecond)
+		time.Sleep(1 * time.Millisecond)
 	}
 }
 
@@ -38,6 +38,7 @@ func handleSignals() {
 	for s := range signals {
 		switch s {
 		case syscall.SIGINT, syscall.SIGUSR1, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt:
+			// Catch signals that might terminate the process on behalf all goroutines.
 			quit()
 		}
 	}
@@ -45,7 +46,7 @@ func handleSignals() {
 
 func quit() {
 	log.Println("Waiting for cleanup...")
-  // Perform any necessary cleanup here.
+	// Perform any necessary cleanup here.
 	log.Println("Exiting")
 	os.Exit(1)
 }
@@ -58,5 +59,5 @@ func main() {
 	defer client.Close()
 	defer producer.Close()
 
-  run()
+	run()
 }

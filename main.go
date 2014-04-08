@@ -51,11 +51,11 @@ func work() {
 
 func handleSignals() {
 	signals := make(chan os.Signal, 1)
-	signal.Notify(signals, syscall.SIGUSR1, syscall.SIGINT, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt)
+	signal.Notify(signals, syscall.SIGUSR1, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt)
 
 	for s := range signals {
 		switch s {
-		case syscall.SIGINT, syscall.SIGUSR1, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt:
+		case syscall.SIGUSR1, syscall.SIGTERM, syscall.SIGKILL, os.Interrupt:
 			// Catch signals that might terminate the process on behalf all goroutines.
 			quit()
 		}

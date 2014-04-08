@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
 	"log"
 	"os"
@@ -16,17 +17,28 @@ func run() {
 }
 
 func work() {
-	log.Println("waiting for rsyslog input...")
-	rsyslog := ""
+	client, producer, err := gomkafka.Gomkafka()
+	if err != nil {
+		panic(err)
+	}
+	defer client.Close()
+	defer producer.Close()
+
+	msg := ""
 
 	for {
-		_, err := fmt.Scanf("%s\n", &rsyslog)
-
+		_, err := fmt.Scanf("%s\n", &msg)
 		if err != nil {
 			return
 		}
 
-		fmt.Println(rsyslog)
+		log.Println("sending")
+		err = producer.SendMessage("monitoring", nil, kafka.StringEncoder(msg))
+		log.Println("sent")
+		if err != nil {
+			panic(err)
+		}
+
 		time.Sleep(1 * time.Millisecond)
 	}
 }
@@ -45,19 +57,10 @@ func handleSignals() {
 }
 
 func quit() {
-	log.Println("Waiting for cleanup...")
 	// Perform any necessary cleanup here.
-	log.Println("Exiting")
 	os.Exit(1)
 }
 
 func main() {
-	client, producer, err := gomkafka.Gomkafka()
-	if err != nil {
-		panic(err)
-	}
-	defer client.Close()
-	defer producer.Close()
-
 	run()
 }

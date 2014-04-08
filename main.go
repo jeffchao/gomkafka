@@ -33,10 +33,19 @@ func work() {
 		}
 
 		log.Println("sending")
-		err = producer.SendMessage("monitoring", nil, kafka.StringEncoder(msg))
+		err = producer.QueueMessage("monitoring", nil, kafka.StringEncoder(msg))
 		log.Println("sent")
 		if err != nil {
 			panic(err)
+		}
+
+		select {
+		case err = <-producer.Errors():
+			if err != nil {
+				panic(err)
+			}
+		default:
+			// Perform a noop so sarama can can catch disconnect on the other end.
 		}
 
 		time.Sleep(1 * time.Millisecond)

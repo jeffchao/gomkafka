@@ -4,7 +4,6 @@ import (
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -32,9 +31,7 @@ func work() {
 			return
 		}
 
-		log.Println("sending")
 		err = producer.QueueMessage("monitoring", nil, kafka.StringEncoder(msg))
-		log.Println("sent")
 		if err != nil {
 			panic(err)
 		}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
@@ -19,25 +18,31 @@ func run() {
 
 func initConfig() (gomkafka.KafkaConfig, error) {
 	config := gomkafka.KafkaConfig{}
-	var hostArgs string
 
-	flag.StringVar(&config.ClientId, "c", "", "Kafka client id (REQUIRED)")
-	flag.StringVar(&hostArgs, "h", "", "comma-separated list of host addresses with their ports (REQUIRED)")
-	flag.StringVar(&config.Topic, "t", "", "Kafka topic (REQUIRED)")
+  if len(os.Args) != 4 {
+    printUsage()
+    os.Exit(2)
+  }
 
-	flag.Parse()
-
-	hosts := strings.Split(hostArgs, ",")
-	for _, h := range hosts {
-		config.Hosts = append(config.Hosts, h)
-	}
+  config.ClientId = os.Args[1]
+  for _, h := range strings.Split(os.Args[2], ",") {
+    config.Hosts = append(config.Hosts, h)
+  }
+  config.Topic = os.Args[3]
 
 	if config.ClientId == "" || len(config.Hosts) == 0 || config.Topic == "" {
-		flag.PrintDefaults()
+    printUsage()
 		os.Exit(2)
 	}
 
 	return config, nil
+}
+
+func printUsage() {
+  fmt.Printf("Usage: gomkafka id hosts topic\n")
+  fmt.Printf("\tid\tKafka client id (REQUIRED)\n")
+  fmt.Printf("\thosts\tComma-separated list of host:port pairs (REQUIRED)\n")
+  fmt.Printf("\ttopic\tKafka topic (REQUIRED)\n")
 }
 
 func work() {

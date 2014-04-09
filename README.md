@@ -21,7 +21,7 @@ module(load="omprog")
 
 if $rawmsg contains "[monitoring]" then
   action(type="omprog"
-         binary="/path/to/gomkafka" --param1=\"client id\" --param2=localhost:9092 --param3=monitoring"
+         binary="/path/to/gomkafka --param1=\"client id\" --param2=localhost:9092 --param3=monitoring")
 ```
 
 The `$rawmsg` is a default rsyslog property representing the raw message. The statement "if `property` contains `value` then..." conditionally executes gomkafka where contains must exactly match the `value`. It  cannot be a regex.

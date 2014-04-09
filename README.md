@@ -3,7 +3,7 @@ gomkafka
 
 Per rsyslog external plugin requirements, we should read from stdin, use a single thread, and ensure no output is sent to stdout.
 
-### Usage
+## Usage
 
 ```shell
 $ bin/zookeeper-server-start.sh config/zookeeper.properties
@@ -12,7 +12,7 @@ $ gomkafka "client id" localhost:9092 monitoring
 (CTRL-C to exit)
 ```
 
-### Integration with Rsyslog
+## Integration with Rsyslog
 
 Add this to your `rsyslog.conf`
 
@@ -26,7 +26,7 @@ if $rawmsg contains "[monitoring]" then
 
 The `$rawmsg` is a default rsyslog property representing the raw message. The statement "if `property` contains `value` then..." conditionally executes gomkafka where contains must exactly match the `value`. It  cannot be a regex.
 
-Additionally, you may filter on severity per RFC 3164.
+Additionally, you may filter on severity, per RFC 3164, using the `$syslogseverity` or `$syslogseverity-text` property.
 
 ```
 Numerical         Severity
@@ -42,8 +42,12 @@ Numerical         Severity
     7       Debug: debug-level messages
 ```
 
-### Testing
+## Testing
 
 ```shell
 $ echo "foo" | gomkafka "client id" localhost:9092 monitoring
 ```
+
+## Author
+
+Jeff Chao, @thejeffchao, http://thejeffchao.com

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 )
@@ -15,8 +17,36 @@ func run() {
 	work()
 }
 
+func initConfig() (gomkafka.KafkaConfig, error) {
+	config := gomkafka.KafkaConfig{}
+	var hostArgs string
+
+	flag.StringVar(&config.ClientId, "c", "", "Kafka client id (REQUIRED)")
+	flag.StringVar(&hostArgs, "h", "", "comma-separated list of host addresses with their ports (REQUIRED)")
+	flag.StringVar(&config.Topic, "t", "", "Kafka topic (REQUIRED)")
+
+	flag.Parse()
+
+	hosts := strings.Split(hostArgs, ",")
+	for _, h := range hosts {
+		config.Hosts = append(config.Hosts, h)
+	}
+
+	if config.ClientId == "" || len(config.Hosts) == 0 || config.Topic == "" {
+		flag.PrintDefaults()
+		os.Exit(2)
+	}
+
+	return config, nil
+}
+
 func work() {
-	client, producer, err := gomkafka.Gomkafka()
+	config, err := initConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	client, producer, err := gomkafka.Gomkafka(config)
 	if err != nil {
 		panic(err)
 	}

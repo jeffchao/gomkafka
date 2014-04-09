@@ -12,13 +12,7 @@ type KafkaConfig struct {
 }
 
 // Initialize a kafka client and producer based off of KafkaConfig.
-func Gomkafka() (*kafka.Client, *kafka.Producer, error) {
-	config := KafkaConfig{
-		"client_id",
-		[]string{"localhost:9092"},
-		"monitoring",
-	}
-
+func Gomkafka(config KafkaConfig) (*kafka.Client, *kafka.Producer, error) {
 	client, err := kafka.NewClient(config.ClientId, config.Hosts, &kafka.ClientConfig{MetadataRetries: 1, WaitForElection: 250 * time.Millisecond})
 	if err != nil {
 		panic(err)

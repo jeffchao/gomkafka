@@ -45,7 +45,7 @@ Numerical         Severity
 ## Testing
 
 ```shell
-$ echo "foo" | gomkafka "client id" localhost:9092 monitoring
+$ echo "foo" | gomkafka client_id localhost:9092 monitoring
 ```
 
 ## Author

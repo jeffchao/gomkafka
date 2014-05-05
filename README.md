@@ -19,9 +19,9 @@ Add this to your `rsyslog.conf`
 ```shell
 module(load="omprog")
 
-if $rawmsg contains "[monitoring]" then
-  action(type="omprog"
-         binary="/path/to/gomkafka client_id localhost:9092 monitoring")
+if $rawmsg contains "[monitoring]" and ($syslogseverity == 6 or $syslogseverity == 5) then {
+  action(type="omprog" binary="/path/to/gomkafka client_id localhost:9092 monitoring")
+}
 ```
 
 The `$rawmsg` is a default rsyslog property representing the raw message. The statement "if `property` contains `value` then..." conditionally executes gomkafka where contains must exactly match the `value`. It  cannot be a regex.

@@ -14,6 +14,23 @@ $ gomkafka "client id" localhost:9092 monitoring
 (CTRL-C to exit)
 ```
 
+## Building
+
+You will first need godep.
+
+```shell
+go get github.com/tools/godep
+```
+
+Then you can build as normal.
+
+```shell
+godep restore
+go install
+```
+
+Once you have the binary, you can put it anywhere as long as your `rsyslog.conf` correctly points to it and has correct permissions.
+
 ## Integration with Rsyslog
 
 Add this to your `rsyslog.conf`
@@ -29,6 +46,8 @@ if $rawmsg contains '[monitoring]' and ($syslogseverity == 6 or $syslogseverity 
 The `$rawmsg` is a default rsyslog property representing the raw message. The statement "if `property` contains `value` then..." conditionally executes gomkafka where contains must exactly match the `value`. It  cannot be a regex.
 
 Additionally, you may filter on severity, per RFC 3164, using the `$syslogseverity` or `$syslogseverity-text` property.
+
+Now in this example, in your app-tier code, you will have a logger that logs to syslog with log level `info` or `notice` with some text `[monitoring]`. If those conditions are met, then gomkafka will pick up the log event and ship it over to a Kafka cluster.
 
 ```
 Numerical         Severity

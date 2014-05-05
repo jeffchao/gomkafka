@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/jeffchao/gomkafka.svg?branch=master)](https://travis-ci.org/jeffchao/gomkafka)
-
 gomkafka
 ========
+
+[![Build Status](https://travis-ci.org/jeffchao/gomkafka.svg?branch=master)](https://travis-ci.org/jeffchao/gomkafka)
 
 Gomkafka is a rsyslog external plugin that collects rsyslog logs and ships them over to a Kafka cluster in near realtime.
 

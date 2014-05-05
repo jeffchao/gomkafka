@@ -47,8 +47,6 @@ The `$rawmsg` is a default rsyslog property representing the raw message. The st
 
 Additionally, you may filter on severity, per RFC 3164, using the `$syslogseverity` or `$syslogseverity-text` property.
 
-Now in this example, in your app-tier code, you will have a logger that logs to syslog with log level `info` or `notice` with some text `[monitoring]`. If those conditions are met, then gomkafka will pick up the log event and ship it over to a Kafka cluster.
-
 ```
 Numerical         Severity
   Code
@@ -62,6 +60,8 @@ Numerical         Severity
     6       Informational: informational messages
     7       Debug: debug-level messages
 ```
+
+Now in the above example: In your app-tier code, you will have a logger that logs to syslog with log level `info` or `notice` with some text `[monitoring]`. If those conditions are met, then gomkafka will pick up the log event and ship it over to a Kafka cluster.
 
 ## Testing
 

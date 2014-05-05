@@ -1,0 +1,15 @@
+{
+	"ImportPath": "github.com/jeffchao/gomkafka",
+	"GoVersion": "go1.2.1",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/snappy-go/snappy",
+			"Comment": "null-15",
+			"Rev": "12e4b4183793ac4b061921e7980845e750679fd0"
+		},
+		{
+			"ImportPath": "github.com/Shopify/sarama",
+			"Rev": "193b1dd483a30834280cb23fd4d41520d7f5b069"
+		}
+	]
+}

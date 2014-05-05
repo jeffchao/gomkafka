@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
@@ -19,19 +20,19 @@ func run() {
 func initConfig() (*gomkafka.KafkaConfig, error) {
 	config := &gomkafka.KafkaConfig{}
 
-  if len(os.Args) != 4 {
-    printUsage()
-    os.Exit(2)
-  }
+	if len(os.Args) != 4 {
+		printUsage()
+		os.Exit(2)
+	}
 
-  config.ClientId = os.Args[1]
-  for _, h := range strings.Split(os.Args[2], ",") {
-    config.Hosts = append(config.Hosts, h)
-  }
-  config.Topic = os.Args[3]
+	config.ClientId = os.Args[1]
+	for _, h := range strings.Split(os.Args[2], ",") {
+		config.Hosts = append(config.Hosts, h)
+	}
+	config.Topic = os.Args[3]
 
 	if config.ClientId == "" || len(config.Hosts) == 0 || config.Topic == "" {
-    printUsage()
+		printUsage()
 		os.Exit(2)
 	}
 
@@ -39,10 +40,10 @@ func initConfig() (*gomkafka.KafkaConfig, error) {
 }
 
 func printUsage() {
-  fmt.Printf("Usage: gomkafka id hosts topic\n")
-  fmt.Printf("\tid\tKafka client id (REQUIRED)\n")
-  fmt.Printf("\thosts\tComma-separated list of host:port pairs (REQUIRED)\n")
-  fmt.Printf("\ttopic\tKafka topic (REQUIRED)\n")
+	fmt.Printf("Usage: gomkafka id hosts topic\n")
+	fmt.Printf("\tid\tKafka client id (REQUIRED)\n")
+	fmt.Printf("\thosts\tComma-separated list of host:port pairs (REQUIRED)\n")
+	fmt.Printf("\ttopic\tKafka topic (REQUIRED)\n")
 }
 
 func work() {
@@ -58,10 +59,10 @@ func work() {
 	defer client.Close()
 	defer producer.Close()
 
-	msg := ""
+	in := bufio.NewReader(os.Stdin)
 
 	for {
-		_, err := fmt.Scanf("%s\n", &msg)
+		msg, err := in.ReadString('\n')
 		if err != nil {
 			return
 		}

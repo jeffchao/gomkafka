@@ -16,8 +16,8 @@ func run() {
 	work()
 }
 
-func initConfig() (gomkafka.KafkaConfig, error) {
-	config := gomkafka.KafkaConfig{}
+func initConfig() (*gomkafka.KafkaConfig, error) {
+	config := &gomkafka.KafkaConfig{}
 
   if len(os.Args) != 4 {
     printUsage()

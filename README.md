@@ -1,7 +1,9 @@
+[![Build Status](https://travis-ci.org/jeffchao/gomkafka.svg?branch=master)](https://travis-ci.org/jeffchao/gomkafka)
+
 gomkafka
 ========
 
-Per rsyslog external plugin requirements, we should read from stdin, use a single thread, and ensure no output is sent to stdout.
+Gomkafka is a rsyslog external plugin that collects rsyslog logs and ships them over to a Kafka cluster in near realtime.
 
 ## Usage
 
@@ -19,7 +21,7 @@ Add this to your `rsyslog.conf`
 ```shell
 module(load="omprog")
 
-if $rawmsg contains "[monitoring]" and ($syslogseverity == 6 or $syslogseverity == 5) then {
+if $rawmsg contains '[monitoring]' and ($syslogseverity == 6 or $syslogseverity == 5) then {
   action(type="omprog" binary="/path/to/gomkafka client_id localhost:9092 monitoring")
 }
 ```

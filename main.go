@@ -5,6 +5,7 @@ import (
 	"fmt"
 	kafka "github.com/Shopify/sarama"
 	"github.com/jeffchao/gomkafka/gomkafka"
+	"log"
 	"os"
 	"os/signal"
 	"strings"
@@ -12,9 +13,14 @@ import (
 	"time"
 )
 
-func run() {
+func run() error {
 	go handleSignals()
-	work()
+	err := work()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func initConfig() (*gomkafka.KafkaConfig, error) {
@@ -25,13 +31,13 @@ func initConfig() (*gomkafka.KafkaConfig, error) {
 		os.Exit(2)
 	}
 
-	config.ClientId = os.Args[1]
+	config.ClientID = os.Args[1]
 	for _, h := range strings.Split(os.Args[2], ",") {
 		config.Hosts = append(config.Hosts, h)
 	}
 	config.Topic = os.Args[3]
 
-	if config.ClientId == "" || len(config.Hosts) == 0 || config.Topic == "" {
+	if config.ClientID == "" || len(config.Hosts) == 0 || config.Topic == "" {
 		printUsage()
 		os.Exit(2)
 	}
@@ -46,10 +52,10 @@ func printUsage() {
 	fmt.Printf("\ttopic\tKafka topic (REQUIRED)\n")
 }
 
-func work() {
+func work() error {
 	config, err := initConfig()
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	client, producer, err := gomkafka.Gomkafka(config)
@@ -64,18 +70,18 @@ func work() {
 	for {
 		msg, err := in.ReadString('\n')
 		if err != nil {
-			return
+			return err
 		}
 
 		err = producer.QueueMessage("monitoring", nil, kafka.StringEncoder(msg))
 		if err != nil {
-			panic(err)
+			return err
 		}
 
 		select {
 		case err = <-producer.Errors():
 			if err != nil {
-				panic(err)
+				return err
 			}
 		default:
 			// Perform a noop so sarama can can catch disconnect on the other end.
@@ -104,5 +110,8 @@ func quit() {
 }
 
 func main() {
-	run()
+	err := run()
+	if err != nil {
+		log.Fatalf("%+v", err)
+	}
 }

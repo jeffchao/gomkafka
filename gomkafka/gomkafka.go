@@ -5,15 +5,21 @@ import (
 	"time"
 )
 
+/*
+KafkaConfig represents the required configuration settings to create a
+Kafka client to send requests to a topic in a Kafka cluster.
+*/
 type KafkaConfig struct {
-	ClientId string
+	ClientID string
 	Hosts    []string
 	Topic    string
 }
 
-// Initialize a kafka client and producer based off of KafkaConfig.
+/*
+Gomkafka will Initialize a kafka client and producer based off of KafkaConfig.
+*/
 func Gomkafka(config *KafkaConfig) (*kafka.Client, *kafka.Producer, error) {
-	client, err := kafka.NewClient(config.ClientId, config.Hosts, &kafka.ClientConfig{MetadataRetries: 1, WaitForElection: 250 * time.Millisecond})
+	client, err := kafka.NewClient(config.ClientID, config.Hosts, &kafka.ClientConfig{MetadataRetries: 1, WaitForElection: 250 * time.Millisecond})
 	if err != nil {
 		return nil, nil, err
 	}

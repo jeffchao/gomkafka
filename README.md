@@ -2,6 +2,7 @@ gomkafka
 ========
 
 [![Build Status](https://travis-ci.org/jeffchao/gomkafka.svg?branch=master)](https://travis-ci.org/jeffchao/gomkafka)
+[![GoDoc](https://godoc.org/github.com/jeffchao/gomkafka/gomkafka?status.svg)](https://godoc.org/github.com/jeffchao/gomkafka/gomkafka)
 
 Go Output Module for Kafka (Gomkafka) is a rsyslog external plugin that collects rsyslog logs and ships them over to a Kafka cluster in near realtime.
 

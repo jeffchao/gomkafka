@@ -1,8 +1,7 @@
 package gomkafka
 
 import (
-	kafka "github.com/Shopify/sarama"
-	"time"
+	"github.com/Shopify/sarama"
 )
 
 /*
@@ -18,13 +17,13 @@ type KafkaConfig struct {
 /*
 Gomkafka will Initialize a kafka client and producer based off of KafkaConfig.
 */
-func Gomkafka(config *KafkaConfig) (*kafka.Client, *kafka.Producer, error) {
-	client, err := kafka.NewClient(config.ClientID, config.Hosts, &kafka.ClientConfig{MetadataRetries: 1, WaitForElection: 250 * time.Millisecond})
+func Gomkafka(config *KafkaConfig) (*sarama.Client, *sarama.Producer, error) {
+	client, err := sarama.NewClient(config.ClientID, config.Hosts, sarama.NewClientConfig())
 	if err != nil {
 		return nil, nil, err
 	}
 
-	producer, err := kafka.NewProducer(client, &kafka.ProducerConfig{RequiredAcks: kafka.WaitForLocal, MaxBufferedBytes: 1, MaxBufferTime: 1})
+	producer, err := sarama.NewProducer(client, nil)
 	if err != nil {
 		return nil, nil, err
 	}

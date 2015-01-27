@@ -12,6 +12,7 @@ import (
 type TestState interface {
 	Error(args ...interface{})
 	Fatal(args ...interface{})
+	Errorf(format string, args ...interface{})
 	Fatalf(format string, args ...interface{})
 }
 
@@ -26,16 +27,15 @@ type TestState interface {
 // It is not necessary to prefix message length or correlation ID to your response bytes, the server does that
 // automatically as a convenience.
 type MockBroker struct {
-	brokerID     int
+	brokerID     int32
 	port         int32
 	stopper      chan bool
 	expectations chan encoder
 	listener     net.Listener
 	t            TestState
-	expecting    encoder
 }
 
-func (b *MockBroker) BrokerID() int {
+func (b *MockBroker) BrokerID() int32 {
 	return b.brokerID
 }
 
@@ -47,15 +47,9 @@ func (b *MockBroker) Addr() string {
 	return b.listener.Addr().String()
 }
 
-type rawExpectation []byte
-
-func (r rawExpectation) ResponseBytes() []byte {
-	return r
-}
-
 func (b *MockBroker) Close() {
-	if b.expecting != nil {
-		b.t.Fatalf("Not all expectations were satisfied in mockBroker with ID=%d! Still waiting on %#v", b.BrokerID(), b.expecting)
+	if len(b.expectations) > 0 {
+		b.t.Errorf("Not all expectations were satisfied in mockBroker with ID=%d! Still waiting on %d", b.BrokerID(), len(b.expectations))
 	}
 	close(b.expectations)
 	<-b.stopper
@@ -74,9 +68,7 @@ func (b *MockBroker) serverLoop() (ok bool) {
 	reqHeader := make([]byte, 4)
 	resHeader := make([]byte, 8)
 	for expectation := range b.expectations {
-		b.expecting = expectation
 		_, err = io.ReadFull(conn, reqHeader)
-		b.expecting = nil
 		if err != nil {
 			return b.serverError(err, conn)
 		}
@@ -118,16 +110,20 @@ func (b *MockBroker) serverLoop() (ok bool) {
 func (b *MockBroker) serverError(err error, conn net.Conn) bool {
 	b.t.Error(err)
 	if conn != nil {
-		conn.Close()
+		if err := conn.Close(); err != nil {
+			b.t.Error(err)
+		}
 	}
-	b.listener.Close()
+	if err := b.listener.Close(); err != nil {
+		b.t.Error(err)
+	}
 	return false
 }
 
 // NewMockBroker launches a fake Kafka broker. It takes a TestState (e.g. *testing.T) as provided by the
 // test framework and a channel of responses to use.  If an error occurs it is
 // simply logged to the TestState and the broker exits.
-func NewMockBroker(t TestState, brokerID int) *MockBroker {
+func NewMockBroker(t TestState, brokerID int32) *MockBroker {
 	var err error
 
 	broker := &MockBroker{

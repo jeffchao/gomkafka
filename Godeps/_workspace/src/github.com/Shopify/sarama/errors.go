@@ -9,8 +9,8 @@ import (
 // or otherwise failed to respond.
 var OutOfBrokers = errors.New("kafka: Client has run out of available brokers to talk to. Is your cluster reachable?")
 
-// NoSuchTopic is the error returned when the supplied topic is rejected by the Kafka servers.
-var NoSuchTopic = errors.New("kafka: Topic not recognized by brokers.")
+// ClosedClient is the error returned when a method is called on a client that has been closed.
+var ClosedClient = errors.New("kafka: Tried to use a client that was closed.")
 
 // IncompleteResponse is the error returned when the server returns a syntactically valid response, but it does
 // not contain the expected information.
@@ -35,6 +35,9 @@ var EncodingError = errors.New("kafka: Error while encoding packet.")
 // of the message set.
 var InsufficientData = errors.New("kafka: Insufficient data to decode packet, more bytes expected.")
 
+// ShuttingDown is returned when a producer receives a message during shutdown.
+var ShuttingDown = errors.New("kafka: Message received by producer in process of shutting down.")
+
 // DecodingError is returned when there was an error (other than truncated data) decoding the Kafka broker's response.
 // This can be a bad CRC or length field, or any other invalid value.
 type DecodingError struct {
@@ -56,40 +59,29 @@ func (err ConfigurationError) Error() string {
 	return "kafka: Invalid Configuration: " + string(err)
 }
 
-// DroppedMessagesError is returned from a producer when messages weren't able to be successfully delivered to a broker.
-type DroppedMessagesError struct {
-	DroppedMessages int
-	Err             error
-}
-
-func (err DroppedMessagesError) Error() string {
-	if err.Err != nil {
-		return fmt.Sprintf("kafka: Dropped %d messages: %s", err.DroppedMessages, err.Err.Error())
-	} else {
-		return fmt.Sprintf("kafka: Dropped %d messages", err.DroppedMessages)
-	}
-}
-
 // KError is the type of error that can be returned directly by the Kafka broker.
 // See https://cwiki.apache.org/confluence/display/KAFKA/A+Guide+To+The+Kafka+Protocol#AGuideToTheKafkaProtocol-ErrorCodes
 type KError int16
 
 // Numeric error codes returned by the Kafka server.
 const (
-	NoError                  KError = 0
-	Unknown                  KError = -1
-	OffsetOutOfRange         KError = 1
-	InvalidMessage           KError = 2
-	UnknownTopicOrPartition  KError = 3
-	InvalidMessageSize       KError = 4
-	LeaderNotAvailable       KError = 5
-	NotLeaderForPartition    KError = 6
-	RequestTimedOut          KError = 7
-	BrokerNotAvailable       KError = 8
-	ReplicaNotAvailable      KError = 9
-	MessageSizeTooLarge      KError = 10
-	StaleControllerEpochCode KError = 11
-	OffsetMetadataTooLarge   KError = 12
+	NoError                         KError = 0
+	Unknown                         KError = -1
+	OffsetOutOfRange                KError = 1
+	InvalidMessage                  KError = 2
+	UnknownTopicOrPartition         KError = 3
+	InvalidMessageSize              KError = 4
+	LeaderNotAvailable              KError = 5
+	NotLeaderForPartition           KError = 6
+	RequestTimedOut                 KError = 7
+	BrokerNotAvailable              KError = 8
+	ReplicaNotAvailable             KError = 9
+	MessageSizeTooLarge             KError = 10
+	StaleControllerEpochCode        KError = 11
+	OffsetMetadataTooLarge          KError = 12
+	OffsetsLoadInProgress           KError = 14
+	ConsumerCoordinatorNotAvailable KError = 15
+	NotCoordinatorForConsumer       KError = 16
 )
 
 func (err KError) Error() string {
@@ -117,13 +109,19 @@ func (err KError) Error() string {
 	case BrokerNotAvailable:
 		return "kafka server: Broker not available. Not a client facing error, we should never receive this!!!"
 	case ReplicaNotAvailable:
-		return "kafka server: Replica not available. No replicas are available to read from this topic-partition."
+		return "kafka server: Replica infomation not available, one or more brokers are down."
 	case MessageSizeTooLarge:
 		return "kafka server: Message was too large, server rejected it to avoid allocation error."
 	case StaleControllerEpochCode:
-		return "kafka server: Stale controller epoch code. ???"
+		return "kafka server: StaleControllerEpochCode (internal error code for broker-to-broker communication)."
 	case OffsetMetadataTooLarge:
 		return "kafka server: Specified a string larger than the configured maximum for offset metadata."
+	case OffsetsLoadInProgress:
+		return "kafka server: The broker is still loading offsets after a leader change for that offset's topic partition."
+	case ConsumerCoordinatorNotAvailable:
+		return "kafka server: Offset's topic has not yet been created."
+	case NotCoordinatorForConsumer:
+		return "kafka server: Request was for a consumer group that is not coordinated by this broker."
 	}
 
 	return fmt.Sprintf("Unknown error, how did this happen? Error code = %d", err)

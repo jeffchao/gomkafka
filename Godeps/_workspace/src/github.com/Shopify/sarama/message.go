@@ -56,12 +56,16 @@ func (m *Message) encode(pe packetEncoder) error {
 		case CompressionGZIP:
 			var buf bytes.Buffer
 			writer := gzip.NewWriter(&buf)
-			writer.Write(m.Value)
-			writer.Close()
+			if _, err = writer.Write(m.Value); err != nil {
+				return err
+			}
+			if err = writer.Close(); err != nil {
+				return err
+			}
 			m.compressedCache = buf.Bytes()
 			payload = m.compressedCache
 		case CompressionSnappy:
-			tmp, err := SnappyEncode(m.Value)
+			tmp, err := snappyEncode(m.Value)
 			if err != nil {
 				return err
 			}
@@ -72,8 +76,7 @@ func (m *Message) encode(pe packetEncoder) error {
 		}
 	}
 
-	err = pe.putBytes(payload)
-	if err != nil {
+	if err = pe.putBytes(payload); err != nil {
 		return err
 	}
 
@@ -129,7 +132,7 @@ func (m *Message) decode(pd packetDecoder) (err error) {
 		if m.Value == nil {
 			return DecodingError{Info: "Snappy compression specified, but no data to uncompress"}
 		}
-		if m.Value, err = SnappyDecode(m.Value); err != nil {
+		if m.Value, err = snappyDecode(m.Value); err != nil {
 			return err
 		}
 		return m.decodeSet()

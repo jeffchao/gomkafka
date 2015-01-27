@@ -17,13 +17,13 @@ type KafkaConfig struct {
 /*
 Gomkafka will Initialize a kafka client and producer based off of KafkaConfig.
 */
-func Gomkafka(config *KafkaConfig) (*sarama.Client, *sarama.Producer, error) {
+func Gomkafka(config *KafkaConfig) (*sarama.Client, *sarama.SimpleProducer, error) {
 	client, err := sarama.NewClient(config.ClientID, config.Hosts, sarama.NewClientConfig())
 	if err != nil {
 		return nil, nil, err
 	}
 
-	producer, err := sarama.NewProducer(client, nil)
+	producer, err := sarama.NewSimpleProducer(client, nil)
 	if err != nil {
 		return nil, nil, err
 	}

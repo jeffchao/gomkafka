@@ -10,6 +10,10 @@
 		{
 			"ImportPath": "github.com/Shopify/sarama",
 			"Rev": "193b1dd483a30834280cb23fd4d41520d7f5b069"
+		},
+		{
+			"ImportPath": "github.com/eapache/go-resiliency/breaker",
+			"Rev": "5b8ad6c0f61096fdfca79f5e2226c73bb031ef87"
 		}
 	]
 }
